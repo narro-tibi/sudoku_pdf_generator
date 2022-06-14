@@ -1,0 +1,13 @@
+Make this file an ini file
+Have default values that can be changed via console or manually in this file
+On initialization, all data will be parsed and set from this file
+Does nano work in Windows?
+
+
+1. page count start
+2. fonts
+3. font sizes
+4. custom texts
+5. sudoku grid size
+6. difficulties
+7. amount per page
