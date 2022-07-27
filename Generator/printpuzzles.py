@@ -73,29 +73,60 @@ def generate_four_pdf(page, sudokunum, pagenum, puzzles):
     # print current progress
     print("Currently working on drawing a puzzle on page " + str(pagenum) + "...")
 
-    # sudoku_index = pagenum
     for i, puzzle in enumerate(puzzles):
-        # sudoku_index = pagenum + i
-        #
-        # if (pagenum - 1 == (i)):
-        #     if (i == 0 and pagenum == 1):
-        #         sudoku_index = pagenum + i
-        #     else:
-        #         print("equals", pagenum, i, pagenum * 2 + (i))
-        #         sudoku_index = pagenum * 2 + i
-        # sudoku_index2 = sudoku_index + (i)
-        # print("pagenum", pagenum, i, sudoku_index, sudoku_index2)
-
-        # todo: even / odd number
-        odd = pagenum * pagenum + i + 1
-        even = pagenum * pagenum + i
-
-        if (pagenum % 2):
-            sudoku_index = even
-        else:
-            sudoku_index = odd
+        sudoku_index = pagenum * 4 - 3 + i
 
         draw_board(page, sudoku_index, coords[i][0], coords[i][1], size, puzzle, selfsizes, json_data['FONT_SIZE_4_PAGE'], pagenum)
+
+
+def generate_six_pdf(page, pagenum, puzzles):
+    inch = 72
+    top = PAGE_HEIGHT
+    left = 36
+    size = (PAGE_WIDTH - inch * 1.5) / 2.5
+    right = left + size
+    bottom = top - size
+
+    # todo: get data per puzzle
+    board_size = [3,3,9]
+    for i, puzzle in enumerate(puzzles):
+        board_size = puzzle.get_board_sizes()
+
+    box_height = size / board_size[2]
+
+    font_size = 24
+    if board_size[0] > 3:
+        font_size = font_size - (board_size[0] * 2)
+
+    selfsizes = board_size
+    page_data = [top, left, right, bottom, box_height, font_size]
+
+    col = row = 0
+    i = 0
+    for p, puzzle in enumerate(puzzles):
+        sudoku_index = pagenum * 6 - 5 + i
+        i += 1
+
+        # print current progress
+        print("Currently working on puzzle solutions... " + str(p + 1))
+
+        # todo: get previous last page number, then count page number from there (e.g. 300 sudoku pages, then solutions 301+)
+        # todo: center position of solutions
+        draw_board(page, sudoku_index, PAGE_HEIGHT - 54 - row * 72 * 3.25, 72 + col * 72 * 3.5, 72 * 2.75, puzzle,
+                   selfsizes, json_data['FONT_SIZE_6_PAGE'], pagenum)
+        col += 1
+        if col == 2:
+            col = 0
+            row += 1
+            if row == 3:
+                col = row = 0
+                # if showFooter:
+                #     generateFooter(page)
+                # page.showPage()
+
+    # print current progress
+    print("Currently working on drawing a puzzle on page " + str(pagenum) + "...")
+
 
 def draw_board(page, sudoku_number, top, left, size, puzzle, selfsizes, font_size = 24, page_count=1, is_solution = False):
     gridwidth, gridheight, gridsize = selfsizes
@@ -106,10 +137,19 @@ def draw_board(page, sudoku_number, top, left, size, puzzle, selfsizes, font_siz
     thick_line = 4
     box_height = size / gridsize
 
-    # change line thickness for solutions board
-    if is_solution:
-        thin_line = 0.7
+    # change line thickness for board sizes
+    if json_data['SUDOKUS_PER_PAGE'] == 4:
+        thin_line = 0.8
+        thick_line = 2.75
+    if json_data['SUDOKUS_PER_PAGE'] == 6:
+        thin_line = 0.4
         thick_line = 2
+    if is_solution and json_data['SUDOKUS_PER_PAGE'] == 1:
+        thin_line = 0.4
+        thick_line = 2
+    if is_solution and json_data['SUDOKUS_PER_PAGE'] != 1:
+        thin_line = 0.25
+        thick_line = 1.5
 
     if gridwidth > 3:
         font_size = font_size - (gridwidth * 2)
