@@ -27,7 +27,8 @@ if font != 'Helvetica':
 # PDF page size settings
 PAGE_WIDTH, PAGE_HEIGHT=A4
 
-def generate_pdf_printpuz(sizes, page, pagenum, amount, puzzle):
+
+def generate_single_pdf(sizes, page, pagenum, amount, puzzle):
     # page data
     inch = 72
     size = PAGE_WIDTH - 72
@@ -41,7 +42,8 @@ def generate_pdf_printpuz(sizes, page, pagenum, amount, puzzle):
 
     draw_board(page, pagenum, top, left, size, puzzle, selfsizes, json_data['FONT_SIZE_SINGLE_PAGE'], pagenum)
 
-def generate_four_pdf(page, sudokunum, pagenum, puzzles):
+
+def generate_four_pdf(page, pagenum, puzzles):
     inch = 72
     top = PAGE_HEIGHT
     left = 36
@@ -186,6 +188,7 @@ def draw_board(page, sudoku_number, top, left, size, puzzle, selfsizes, font_siz
 
     # position numbers inside cells
     position_numbers(page, puzzle.board, selfsizes, page_data)
+
 
 def position_numbers(page, board, selfsizes, pagedata):
     gridwidth, gridheight, gridsize = selfsizes
