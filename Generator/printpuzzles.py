@@ -204,13 +204,34 @@ def position_numbers(page, board, selfsizes, pagedata):
                                 gridwidth / 2)) + j * box_height + box_height * 0.38,
                         top - i * box_height - box_height * 0.65, str(col))
 
-def generateSolutions(page, puzzles):
+
+def generateSolutions(page, puzzles, doc_page_number):
     board_size = [3, 3, 9]
     selfsizes = board_size
+
+    # 9 grid display values for a page
+    col_limit = 3
+    top_offset = 72
+    top_multiplier = 2.5
+    left_offset = 36
+    left_multiplier = 2.5
+    size_multiplier = 2
+    modulo_value = 9
+
+    # 6 grid display values for a page
+    if json_data['SUDOKUS_PER_PAGE'] == 1:
+        col_limit = 2
+        top_offset = 54
+        top_multiplier = 3.25
+        left_offset = 72
+        left_multiplier = 3.5
+        size_multiplier = 2.75
+        modulo_value = 6
 
     col = row = 0
     i = 0
     j = 1
+    page_num = doc_page_number + j
     for puz, d in enumerate(puzzles):
         i += 1
         solver = d.solve()
@@ -221,10 +242,10 @@ def generateSolutions(page, puzzles):
 
         # todo: get previous last page number, then count page number from there (e.g. 300 sudoku pages, then solutions 301+)
         # todo: center position of solutions
-        draw_board(page, i, PAGE_HEIGHT - 72 - row * 72 * 2.5, 36 + col * 72 * 2.5, 72 * 2, solver,
-                   selfsizes, json_data['FONT_SIZE_SOLUTIONS'], j, is_solution = True)
+        draw_board(page, i, PAGE_HEIGHT - top_offset - row * 72 * top_multiplier, left_offset + col * 72 * left_multiplier, 72 * size_multiplier, solver,
+                   selfsizes, json_data['FONT_SIZE_SOLUTIONS'], page_num, is_solution=True)
         col += 1
-        if col == 3:
+        if col == col_limit:
             col = 0
             row += 1
             if row == 3:
@@ -232,5 +253,6 @@ def generateSolutions(page, puzzles):
                 # if showFooter:
                 #     generateFooter(page)
                 page.showPage()
-        if ((puz + 1) % 9 == 0):
+        if ((puz + 1) % modulo_value == 0):
             j += 1
+            page_num = doc_page_number + j
