@@ -27,11 +27,6 @@ if font != 'Helvetica':
 # PDF page size settings
 PAGE_WIDTH, PAGE_HEIGHT=A4
 
-def chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
 class UnsolvableSudoku(Exception):
     pass
 
@@ -298,64 +293,6 @@ class Sudoku:
                           self.width) * self.height + '+' + '\n'
         return table
 
-    def generate_pdf(self, page, amount_per_page, amount, difficulty, puzzles):
-        page_count = 1
-        # page data
-        inch = 72
-        size = PAGE_WIDTH - 72
-        top = PAGE_HEIGHT - 72 * 2
-        left = 36
-
-        selfsizes = [self.width, self.height, self.size]
-
-        draw_board(page, difficulty, top, left, size, puzzles, selfsizes, amount)
-
-    def generate_four_pdf(self, page, amount, difficulty, puzzles):
-        amount_per_page = 4
-        inch = 72
-        size = PAGE_WIDTH - 72
-        top = PAGE_HEIGHT - 72 * 2
-        left = 36
-        right = left + size
-        bottom = top - size
-
-        box_height = size / self.size
-
-        font_size = 24
-        if self.width > 3:
-            font_size = font_size - (self.width * 2)
-
-        selfsizes = [self.width, self.height, self.size]
-        page_data = [top, left, right, bottom, box_height, font_size]
-
-        if amount_per_page == 4:
-            top = PAGE_HEIGHT
-            left = 36
-            size = (PAGE_WIDTH - inch * 1.5) / 2
-            coords = [
-                (top - inch * 1, left),
-                (top - inch * 1, left + size + inch * .5),
-                (top - inch * 1 - size - inch, left),
-                (top - inch * 1 - size - inch, left + size + inch * .5),
-            ]
-
-            firstFour = puzzles[0:amount_per_page]
-
-            # mylist[::2]
-            for p, puzzle in enumerate(firstFour):
-                if (p == 0):
-                    for b, puz in enumerate(puzzle):
-                        # print("Sfsdfds", b, puz, puzzle)
-
-                        page_data = [coords[0][0], coords[0][1], right, bottom, box_height, font_size]
-                        # print("PRE", page_data)
-                        page_count = 1
-                        # self.draw_board(page, difficulty, coords[i][0], coords[i][1], size, puzzleboard, page_count)
-                        # TODO: separate drawing of grid and positioning of numbers
-                        draw_board(page, difficulty, coords[b][0], coords[b][1], size, puzzle, selfsizes, page_count)
-                        # print("POST", page_data)
-                        # position_numbers(page, puzzle[0].board, selfsizes, page_data)
-
     def __str__(self) -> str:
         if self.__difficulty == -2:
             difficulty_str = 'INVALID PUZZLE (GIVEN PUZZLE HAS NO SOLUTION)'
@@ -372,77 +309,3 @@ Difficulty: {}
 ---------------------------
 {}
         '''.format(self.size, self.size, self.width, self.height, difficulty_str, self.__format_board_ascii())
-
-def generate_pdf2(doc, puzzles, amount_per_page, pages, difficu):
-    Sudoku().generate_pdf(doc, puzzles, amount_per_page, pages, difficu)
-
-def draw_board(page, difficulty, top, left, size, puzzles, selfsizes, page_count=1):
-        gridwidth, gridheight, gridsize = selfsizes
-        right = left + size
-        bottom = top - size
-
-        thin_line = 1
-        thick_line = 4
-        box_height = size / gridsize
-
-        font_size = 24
-        if gridwidth > 3:
-            font_size = font_size - (gridwidth * 2)
-
-        page_data = [top, left, right, bottom, box_height, font_size]
-
-        # custom text above sudoku
-        text_above_sudoku = str(difficulty).capitalize()
-
-        # set font and font size for custom text
-        page.setFont(font, 16)
-        page.drawString(left, PAGE_HEIGHT - 72 * 1.5, "Schwierigkeitsgrad: " + text_above_sudoku)
-
-        # draw page number
-        page_number_font_size = 20
-        page.setFont("Helvetica", page_number_font_size)
-        page.drawString(PAGE_WIDTH / 2 - font_size / 4, 62, str(page_count))
-
-        # draw sudoku board based on dynamic size
-        for i in range(0, gridsize + 1):
-            squared_grid_size = i % gridwidth
-
-            if squared_grid_size == 0:
-                page.setLineWidth(thick_line)
-            else:
-                page.setLineWidth(thin_line)
-            page.line(left, top - i * box_height, right, top - i * box_height)
-            page.line(left + i * box_height, top, left + i * box_height, bottom)
-
-        # set font and font size for Sudoku Board
-        page.setFont("Helvetica", font_size)
-
-        print(puzzles)
-        # position numbers inside cells
-        if type(puzzles) == Sudoku:
-            position_numbers(page, puzzles.board, selfsizes, page_data)
-        else:
-            for p, puzzle in enumerate(list(puzzles)):
-                # if p % 4:
-                # print("p puzzle", p, puzzle)
-
-                # for puz in puzzle:
-                    # print("puz", puz)
-                position_numbers(page, puzzle.board, selfsizes, page_data)
-
-def position_numbers(page, board, selfsizes, pagedata):
-    gridwidth, gridheight, gridsize = selfsizes
-    top, left, right, bottom, box_height, font_size = pagedata
-
-    for i, row in enumerate(board):
-        for j, col in enumerate(row):
-            if col != None:  # TODO: better if condition
-                # adjust position for double digit numbers
-                if col not in range(10, gridsize + 1):
-                    page.drawString(left + j * box_height + box_height * 0.38,
-                                    top - i * box_height - box_height * 0.65, str(col))
-                else:
-                    page.drawString(
-                        left - (font_size / gridwidth + (
-                                gridwidth / 2)) + j * box_height + box_height * 0.38,
-                        top - i * box_height - box_height * 0.65, str(col))
