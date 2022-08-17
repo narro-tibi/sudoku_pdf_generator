@@ -1,14 +1,15 @@
 import math
 import os
-import random
 import sys
 import time
 import json
 from conf import ROOT_DIR
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from Generator.sudoku import Sudoku
+from Generator.sudoku_maker import make_puzzles
 from Generator.printpuzzles import generate_single_pdf, generate_four_pdf, generateSolutions, generate_six_pdf
+
+# from Generator.printpuzzles import generate_single_pdf, generate_four_pdf, generateSolutions, generate_six_pdf
 
 with open('settings.json') as f:
     json_data = json.load(f)
@@ -45,26 +46,21 @@ doc = canvas.Canvas(filename=pdf_file_path, pagesize=A4)
 # grab current time before running the code
 start = time.time()
 
-# Initializes a Sudoku puzzle with n x m grid of a certain difficulty (percentage of numbers removed)
-puzzles = list()
-for i in range(int(amount)):
-    puzzles.append(Sudoku(json_data['SUDOKU_GRID_SIZE'], puzzlenum=i + 1).difficulty(random.uniform(json_data['MIN_DIFFICULTY_LEVEL'], json_data['MAX_DIFFICULTY_LEVEL'])))
-
 def createPDF(output_file, puzzles, perPage = 1, showSolutions = json_data['SHOW_SOLUTIONS']):
     doc = canvas.Canvas(filename=output_file, pagesize=A4)
     doc_page_number = 1
-    # todo: update solution solver for larger grid size
-    # temporary solution: disable solution display on larger than 3x3 grids
-    if json_data['SUDOKU_GRID_SIZE'] != 3:
-        showSolutions = False
 
     if perPage == 1:
         i = 0
         for puzzle in puzzles:
+            # print("PUZZLE CREATE PDF", puzzle)
             i += 1
             doc_page_number = doc.getPageNumber()
-            boardsize = puzzle.get_board_sizes()
-            generate_single_pdf(boardsize, doc, i, i + 1, puzzle)
+            # TODO: update for dynamic grid size
+            nine_puz_grid_size = [3, 3, puzzle[0].group_size]
+            boardsize = nine_puz_grid_size
+            # generate_single_pdf(boardsize, doc, i, i + 1, puzzle)
+            generate_single_pdf(puzzle, boardsize, doc, i)
             doc.showPage()
         if showSolutions:
             generateSolutions(doc, puzzles, doc_page_number)
@@ -91,7 +87,10 @@ def createPDF(output_file, puzzles, perPage = 1, showSolutions = json_data['SHOW
             doc.showPage()
         doc.save()
 
-createPDF(pdf_file_path, puzzles, amount_per_page)
+
+if __name__ == '__main__':
+    puzzles = make_puzzles(json_data['SUDOKU_AMOUNT'], json_data['DIFFICULTY_LEVEL'], json_data['SUDOKU_SQUARE_SIZE'])
+    createPDF(pdf_file_path, puzzles, amount_per_page)
 
 # grab current time after running the code
 end = time.time()
