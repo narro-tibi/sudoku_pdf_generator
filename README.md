@@ -15,7 +15,7 @@ zu komischen Nebeneffekten führen.
 | SUDOKUS_PER_PAGE    | 1          | Anzahl von Sudokus pro Seite. Wahlweise 1, 4 oder 6.                                                                                            |
 | DIFFICULTY_LEVEL  | Any        | Mindestschwierigkeitsgrad der Sudokus. Wahlweise Any (alle), Easy, Medium, Hard, Very Hard. Auch Begrenzung ist möglich (z.B.: "Easy, Medium"). |
 | SORT_BY_DIFFICULTY  | true       | Ob die generierten Sudokus nach Schwierigkeitsgrad (Einfach -> Schwer) sortiert werden sollen.                                                  |
-| CUSTOM_FONT         | ""         | Eigene Fonts einbinden. [Details](README.md#eigene-fonts-hinzufügen).                                                                                     |
+| CUSTOM_FONT         | ""         | Eigene Fonts einbinden. [Details](#eigene-fonts-hinzufügen).                                                                                     |
 | FONT_SIZE_SINGLE_PAGE | 24         | Font-Size von Sudoku-Zahlen und Texten bei Einzelsudokus (1 pro Seite).                                                                         |
 | FONT_SIZE_4_PAGE    | 18         | Font-Size von Sudoku-Zahlen und Texten bei 4-er Sudokus (4 pro Seite).                                                                          |
 | FONT_SIZE_6_PAGE    | 12         | Font-Size von Sudoku-Zahlen und Texten bei 6-er Sudokus (6 pro Seite).                                                                          |
