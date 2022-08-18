@@ -612,7 +612,7 @@ class DifficultyRating:
     def value_string(self):
         if self.value > 0.75:
             return "Very hard"
-        if self.value >= 0.57:
+        if self.value >= 0.59:
             return "Hard"
         elif self.value > 0.45:
             return "Medium"
