@@ -199,9 +199,9 @@ class SudokuGenerator:
         ug = self.unique_generator(**ugargs)
         ret = []
         for i in range(n):
-            print('Working on puzzle ', i)
+            print('Working on puzzle ')
             ret.append(next(ug))
-            print('Got one!')
+            # print('Got one!')
         return ret
 
     def unique_generator(self, symmetrical=True,
