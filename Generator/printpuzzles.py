@@ -35,7 +35,6 @@ PAGE_WIDTH, PAGE_HEIGHT=A4
 
 
 def generate_single_pdf(puzzle, sizes, page, pagenum):
-    puz, d = puzzle
     selfsizes = sizes
 
     top = PAGE_HEIGHT - 72 * 2
@@ -45,9 +44,9 @@ def generate_single_pdf(puzzle, sizes, page, pagenum):
     # print current progress
     print("Currently working on drawing a puzzle on page " + str(pagenum) + "...")
 
-    draw_board(page, puz, pagenum, top, left, size, selfsizes, json_data['FONT_SIZE_SINGLE_PAGE'], pagenum)
+    draw_board(page, puzzle, pagenum, top, left, size, selfsizes, json_data['FONT_SIZE_SINGLE_PAGE'], pagenum)
 
-    return puz, d
+    return puzzle
 
 
 def generate_four_pdf(page, pagenum, puzzles):
@@ -73,9 +72,8 @@ def generate_four_pdf(page, pagenum, puzzles):
     print("Currently working on drawing a puzzle on page " + str(pagenum) + "...")
 
     for i, puzzle in enumerate(puzzles):
-        puz, d = puzzle
         sudoku_index = pagenum * 4 - 3 + i
-        draw_board(page, puz, sudoku_index, coords[i][0], coords[i][1], size, selfsizes, json_data['FONT_SIZE_4_PAGE'], pagenum)
+        draw_board(page, puzzle, sudoku_index, coords[i][0], coords[i][1], size, selfsizes, json_data['FONT_SIZE_4_PAGE'], pagenum)
         i += 1
 
 
@@ -104,7 +102,6 @@ def generate_six_pdf(page, pagenum, puzzles):
     col = row = 0
     i = 0
     for p, puzzle in enumerate(puzzles):
-        puz, d = puzzle
         sudoku_index = pagenum * 6 - 5 + i
         i += 1
 
@@ -113,7 +110,7 @@ def generate_six_pdf(page, pagenum, puzzles):
 
         # draw_board(page, sudoku_index, PAGE_HEIGHT - 54 - row * 72 * 3.25, 72 + col * 72 * 3.5, 72 * 2.75, puzzle,
         #            selfsizes, json_data['FONT_SIZE_6_PAGE'], pagenum)
-        draw_board(page, puz, sudoku_index, PAGE_HEIGHT - 54 - row * 72 * 3.25, 72 + col * 72 * 3.5, 72 * 2.75, selfsizes, json_data['FONT_SIZE_6_PAGE'], pagenum)
+        draw_board(page, puzzle, sudoku_index, PAGE_HEIGHT - 54 - row * 72 * 3.25, 72 + col * 72 * 3.5, 72 * 2.75, selfsizes, json_data['FONT_SIZE_6_PAGE'], pagenum)
         col += 1
         if col == 2:
             col = 0
@@ -129,6 +126,7 @@ def generate_six_pdf(page, pagenum, puzzles):
 
 
 def draw_board(page, puzzle, sudoku_number, top, left, size, selfsizes, font_size = 24, page_count=1, is_solution = False):
+    # puz, d = puzzle
     gridwidth, gridheight, gridsize = selfsizes
     right = left + size
     bottom = top - size
@@ -162,8 +160,12 @@ def draw_board(page, puzzle, sudoku_number, top, left, size, selfsizes, font_siz
     # todo: make a check for text positioning and font size
     # set font and font size for custom text per sudoku
     page.setFont(font, font_size)
-    # page.drawString(left, PAGE_HEIGHT - 72 * 1.5, json_data['CUSTOM_TEXT'] + sudoku_index)
-    page.drawString(left, top + (font_size / 1.5), json_data['CUSTOM_TEXT'] + sudoku_index)
+    # (optional) add difficulty level to custom text
+    custom_text_string = f"{json_data['CUSTOM_TEXT']}{sudoku_index}"
+    if json_data['SHOW_DIFFICULTY_TEXT']:
+        custom_text_string = f"{json_data['CUSTOM_TEXT']}{sudoku_index} ({puzzle[1].value_string()})"
+
+    page.drawString(left, top + (font_size / 1.5), custom_text_string)
 
     # draw page number
     page_number_font_size = 20
@@ -192,7 +194,7 @@ def draw_board(page, puzzle, sudoku_number, top, left, size, selfsizes, font_siz
     #             page.drawString(left + col * box_height + box_height * 0.38, top - row * box_height - box_height * 0.65, num)
 
     # position numbers inside cells
-    position_numbers(page, puzzle, selfsizes, page_data)
+    position_numbers(page, puzzle[0], selfsizes, page_data)
 
 
 def position_numbers(page, puzzle, selfsizes, pagedata):
@@ -230,7 +232,7 @@ def generateSolutions(page, puzzles, doc_page_number):
     top_offset = 72
     top_multiplier = 2.5
     left_offset = 36
-    left_multiplier = 2.5
+    left_multiplier = 2.575
     size_multiplier = 2
     modulo_value = 9
     # 6 grid display values for a page
@@ -256,6 +258,7 @@ def generateSolutions(page, puzzles, doc_page_number):
         i += 1
         solver = SudokuRater(puz.grid, verbose=False, group_size=puz.group_size)
         solver.solve()
+        solved_puzzle = solver, solver.difficulty()
 
         # print current progress
         print("Currently working on puzzle solutions... " + str(p + 1))
@@ -263,7 +266,7 @@ def generateSolutions(page, puzzles, doc_page_number):
         # todo: center position of solutions
         # draw_board(page, i, PAGE_HEIGHT - top_offset - row * 72 * top_multiplier, left_offset + col * 72 * left_multiplier, 72 * size_multiplier, solver,
         #            board_size, font_size, page_num, is_solution=True)
-        draw_board(page, solver, i, PAGE_HEIGHT - top_offset - row * 72 * top_multiplier, left_offset + col * 72 * left_multiplier, 72 * size_multiplier,
+        draw_board(page, solved_puzzle, i, PAGE_HEIGHT - top_offset - row * 72 * top_multiplier, left_offset + col * 72 * left_multiplier, 72 * size_multiplier,
                      board_size, font_size, page_num, True)
         col += 1
         if col == col_limit:
