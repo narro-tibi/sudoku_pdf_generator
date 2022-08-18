@@ -89,7 +89,7 @@ def createPDF(output_file, puzzles, perPage = 1, showSolutions = json_data['SHOW
 
 
 if __name__ == '__main__':
-    puzzles = make_puzzles(json_data['SUDOKU_AMOUNT'], json_data['DIFFICULTY_LEVEL'], json_data['SUDOKU_SQUARE_SIZE'])
+    puzzles = make_puzzles(json_data['SUDOKU_AMOUNT'], json_data['DIFFICULTY_LEVEL'], json_data['SORT_BY_DIFFICULTY'], json_data['SUDOKU_SQUARE_SIZE'])
     createPDF(pdf_file_path, puzzles, amount_per_page)
 
 # grab current time after running the code

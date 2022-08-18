@@ -248,22 +248,24 @@ class InterruptibleSudokuGenerator (SudokuGenerator):
 
 def generate_puzzles_by_difficulty(difficulty='Any', grid_size=9):
     g = SudokuGenerator(None, int((grid_size*0.608)**2), grid_size)
+
     while 1:
         puzzles = g.make_unique_puzzles(1)
         # puzzle = g.generate_puzzle_for_difficulty(0.5, 0.6)
         puz, d = puzzles[0]
-        if difficulty == 'Any' or d.value_string() == difficulty:
-            print("Found the correct difficulty!", difficulty)
+        if difficulty == 'Any' or d.value_string() in difficulty:
+            print("Found the correct difficulty!", d.value, d.value_string())
             break
     return puz, d
 
 
-def make_puzzles(num, difficulty, square_size):
+def make_puzzles(num, difficulty, sort_by_difficulty, square_size):
     grid_size = square_size * square_size
     puzzles = []
     for i in range(int(num)):
         puzzles.append(generate_puzzles_by_difficulty(difficulty, grid_size))
-
+    if sort_by_difficulty:
+        puzzles.sort(key=lambda p: p[1].value)
     return puzzles
 
 
