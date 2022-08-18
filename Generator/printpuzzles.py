@@ -232,7 +232,7 @@ def generateSolutions(page, puzzles, doc_page_number):
     top_offset = 72
     top_multiplier = 2.5
     left_offset = 36
-    left_multiplier = 2.5
+    left_multiplier = 2.575
     size_multiplier = 2
     modulo_value = 9
     # 6 grid display values for a page
