@@ -1,8 +1,7 @@
 import os
 import json
 from Generator.sudoku_solver import SudokuRater
-from conf import ROOT_DIR, font
-from reportlab.lib.pagesizes import A4
+from conf import ROOT_DIR, PAGE_SIZE, get_din_size
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 # Custom Font Warning: if glyphs are missing, suppress warnings = 0, don't supress warnings = 1
@@ -31,34 +30,36 @@ if font != 'Helvetica':
             font = 'Helvetica'
 
 # PDF page size settings
-PAGE_WIDTH, PAGE_HEIGHT=A4
+PAGE_WIDTH, PAGE_HEIGHT=PAGE_SIZE
+din_width, din_height = get_din_size(PAGE_SIZE)
 
 
 def generate_single_pdf(puzzle, sizes, page, pagenum):
     selfsizes = sizes
 
-    top = PAGE_HEIGHT - 72 * 2
-    left = 36
-    size = PAGE_WIDTH - 72
+    top = PAGE_HEIGHT - (PAGE_HEIGHT * 0.175)  # 144
+    left = PAGE_HEIGHT * 0.0875
+    size = PAGE_WIDTH - (PAGE_HEIGHT * 0.175)  # 144
+    font_size = round(json_data['FONT_SIZE_SINGLE_PAGE'] * (((din_width + din_height) / 2) / 100))
 
     # print current progress
     print("Currently working on drawing a puzzle on page " + str(pagenum) + "...")
 
-    draw_board(page, puzzle, pagenum, top, left, size, selfsizes, json_data['FONT_SIZE_SINGLE_PAGE'], pagenum)
+    draw_board(page, puzzle, pagenum, top, left, size, selfsizes, font_size, pagenum)
 
     return puzzle
 
 
 def generate_four_pdf(page, pagenum, puzzles):
-    inch = 72
-    top = PAGE_HEIGHT
-    left = 36
-    size = (PAGE_WIDTH - inch * 1.5) / 2
+    inch = PAGE_HEIGHT * 0.0875  # 72
+    top = PAGE_HEIGHT - (PAGE_HEIGHT * 0.04375)  # 36
+    left = PAGE_HEIGHT * 0.075
+    size = (PAGE_WIDTH - (PAGE_HEIGHT * 0.19)) / 2
 
     # todo: get data per puzzle
     board_size = [3, 3, 9]
     selfsizes = board_size
-
+    font_size = round(json_data['FONT_SIZE_4_PAGE'] * (((din_width + din_height) / 2) / 100))
     box_height = size / board_size[2]
 
     coords = [
@@ -73,17 +74,21 @@ def generate_four_pdf(page, pagenum, puzzles):
 
     for i, puzzle in enumerate(puzzles):
         sudoku_index = pagenum * 4 - 3 + i
-        draw_board(page, puzzle, sudoku_index, coords[i][0], coords[i][1], size, selfsizes, json_data['FONT_SIZE_4_PAGE'], pagenum)
+        draw_board(page, puzzle, sudoku_index, coords[i][0], coords[i][1], size, selfsizes, font_size, pagenum)
         i += 1
 
 
 def generate_six_pdf(page, pagenum, puzzles):
-    inch = 72
+    inch = PAGE_HEIGHT * 0.0875  # 72
     top = PAGE_HEIGHT
-    left = 36
+    # if din_width < 210:
+    #     top = PAGE_HEIGHT - PAGE_HEIGHT * 0.04375
+    left = PAGE_HEIGHT * 0.04375  # 36
     size = (PAGE_WIDTH - inch * 1.5) / 2.5
+    top_medium = inch - (left / 2)
     right = left + size
     bottom = top - size
+    font_size = round(json_data['FONT_SIZE_6_PAGE'] * (((din_width + din_height) / 2) / 100))
 
     # todo: get data per puzzle
     board_size = [3,3,9]
@@ -92,12 +97,12 @@ def generate_six_pdf(page, pagenum, puzzles):
 
     box_height = size / board_size[2]
 
-    font_size = 24
-    if board_size[0] > 3:
-        font_size = font_size - (board_size[0] * 2)
+    # font_size = 24
+    # if board_size[0] > 3:
+    #     font_size = font_size - (board_size[0] * 2)
 
     selfsizes = board_size
-    page_data = [top, left, right, bottom, box_height, font_size]
+    # page_data = [top, left, right, bottom, box_height, font_size]
 
     col = row = 0
     i = 0
@@ -110,7 +115,8 @@ def generate_six_pdf(page, pagenum, puzzles):
 
         # draw_board(page, sudoku_index, PAGE_HEIGHT - 54 - row * 72 * 3.25, 72 + col * 72 * 3.5, 72 * 2.75, puzzle,
         #            selfsizes, json_data['FONT_SIZE_6_PAGE'], pagenum)
-        draw_board(page, puzzle, sudoku_index, PAGE_HEIGHT - 54 - row * 72 * 3.25, 72 + col * 72 * 3.5, 72 * 2.75, selfsizes, json_data['FONT_SIZE_6_PAGE'], pagenum)
+        draw_board(page, puzzle, sudoku_index, PAGE_HEIGHT - top_medium - row * (PAGE_HEIGHT * 0.0875) * 3.25,
+                   (PAGE_HEIGHT * 0.0875) + col * (PAGE_HEIGHT * 0.0875) * 3.5, (PAGE_HEIGHT * 0.0875) * 2.75, selfsizes, font_size, pagenum)
         col += 1
         if col == 2:
             col = 0
@@ -149,6 +155,10 @@ def draw_board(page, puzzle, sudoku_number, top, left, size, selfsizes, font_siz
         thin_line = 0.25
         thick_line = 1.5
 
+    if din_width < 210:
+        thick_line = thick_line / (din_width / 100)
+        thin_line = thin_line * 0.875
+
     if gridwidth > 3:
         font_size = font_size - (gridwidth * 2)
 
@@ -168,9 +178,12 @@ def draw_board(page, puzzle, sudoku_number, top, left, size, selfsizes, font_siz
     page.drawString(left, top + (font_size / 1.5), custom_text_string)
 
     # draw page number
-    page_number_font_size = 20
+    page_number_font_size = round(8 * (((din_width + din_height) / 2) / 100))
+    page_number_position = 62
+    if din_width < 210:
+        page_number_position = PAGE_HEIGHT * 0.04375 + (PAGE_HEIGHT * 0.04375 / 2)
     page.setFont("Helvetica", page_number_font_size)
-    page.drawString(PAGE_WIDTH / 2 - font_size / 4, 62, str(page_count))
+    page.drawString(PAGE_WIDTH / 2 - font_size / 4, page_number_position, str(page_count))
 
     # draw sudoku board based on dynamic size
     for i in range(0, gridsize + 1):
@@ -228,23 +241,30 @@ def generateSolutions(page, puzzles, doc_page_number):
 
     # 9 grid display values for a page
     col_limit = 3
-    font_size = json_data['FONT_SIZE_SOLUTIONS']
-    top_offset = 72
+    font_size = round(json_data['FONT_SIZE_SOLUTIONS'] * (((din_width + din_height) / 2) / 100))
+    top_offset = PAGE_HEIGHT * 0.0875
     top_multiplier = 2.5
-    left_offset = 36
-    left_multiplier = 2.575
-    size_multiplier = 2
+    left_offset = PAGE_HEIGHT * 0.04375
+    left_multiplier = 2.5
+    size_multiplier = round(1 * (din_width / 100))
     modulo_value = 9
+
+    if din_width < 210:
+        size_multiplier = size_multiplier + round(1 * (din_width / 100))
+
     # 6 grid display values for a page
     if json_data['SUDOKUS_PER_PAGE'] == 1:
         col_limit = 2
-        font_size = json_data['FONT_SIZE_6_PAGE']
-        top_offset = 54
+        font_size = round(json_data['FONT_SIZE_6_PAGE'] * (((din_width + din_height) / 2) / 100)) + 1
+        top_offset = PAGE_HEIGHT * 0.04375 + ((PAGE_HEIGHT * 0.04375) / 2)
         top_multiplier = 3.25
-        left_offset = 72
+        left_offset = PAGE_HEIGHT * 0.0875
         left_multiplier = 3.5
-        size_multiplier = 2.75
+        size_multiplier = round(1 * (((din_width + din_height) / 2) / 100), 2)
         modulo_value = 6
+
+        if din_width < 210:
+            size_multiplier = size_multiplier + round(1 * (din_width / 100) / 2)
 
     if json_data['SUDOKU_SQUARE_SIZE'] > 3:
         font_size = json_data['FONT_SIZE_SOLUTIONS_4GRID']
@@ -266,8 +286,9 @@ def generateSolutions(page, puzzles, doc_page_number):
         # todo: center position of solutions
         # draw_board(page, i, PAGE_HEIGHT - top_offset - row * 72 * top_multiplier, left_offset + col * 72 * left_multiplier, 72 * size_multiplier, solver,
         #            board_size, font_size, page_num, is_solution=True)
-        draw_board(page, solved_puzzle, i, PAGE_HEIGHT - top_offset - row * 72 * top_multiplier, left_offset + col * 72 * left_multiplier, 72 * size_multiplier,
-                     board_size, font_size, page_num, True)
+        draw_board(page, solved_puzzle, i, PAGE_HEIGHT - top_offset - row * (PAGE_HEIGHT * 0.0875) * top_multiplier,
+                   left_offset + col * (PAGE_HEIGHT * 0.0875) * left_multiplier, (PAGE_HEIGHT * 0.0875) * size_multiplier,
+                   board_size, font_size, page_num, True)
         col += 1
         if col == col_limit:
             col = 0
