@@ -10,12 +10,13 @@ zu komischen Nebeneffekten führen.
 | Variable            | Wert       | Beschreibung                                                                                                                                    |
 |---------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | PDF_FILE_NAME       | "test"     | Name der generierten PDF. Haben zwei PDFs den gleichen Namen, wird der Name um eine Zahl inkrementiert.                                         |
+| PDF_PAGE_SIZE       | "210,297"  | Breite und Höhe der PDF in mm. <i>Bitte nur 2 Zahlen und mit einem Komma getrennt angeben!</i>                                                  |
 | SUDOKU_SQUARE_SIZE  | 3          | Größe des Rasters. (Höher als 3 auf eigene Gefahr, da das Skript <i>sehr</i> lange brauchen wird.)                                              |
-| SUDOKU_AMOUNT       | 500        | Anzahl zu generierender Sudokus.                                                                                                                |
+| SUDOKU_AMOUNT       | 10         | Anzahl zu generierender Sudokus.                                                                                                                |
 | SUDOKUS_PER_PAGE    | 1          | Anzahl von Sudokus pro Seite. Wahlweise 1, 4 oder 6.                                                                                            |
 | DIFFICULTY_LEVEL  | Any        | Mindestschwierigkeitsgrad der Sudokus. Wahlweise Any (alle), Easy, Medium, Hard, Very Hard. Auch Begrenzung ist möglich (z.B.: "Easy, Medium"). |
 | SORT_BY_DIFFICULTY  | true       | Ob die generierten Sudokus nach Schwierigkeitsgrad (Einfach -> Schwer) sortiert werden sollen.                                                  |
-| CUSTOM_FONT         | ""         | Eigene Fonts einbinden. [Details](#eigene-fonts-hinzufügen).                                                                                     |
+| CUSTOM_FONT         | ""         | Eigene Fonts einbinden. [Details](#eigene-fonts-hinzufügen).                                                                                    |
 | FONT_SIZE_SINGLE_PAGE | 24         | Font-Size von Sudoku-Zahlen und Texten bei Einzelsudokus (1 pro Seite).                                                                         |
 | FONT_SIZE_4_PAGE    | 18         | Font-Size von Sudoku-Zahlen und Texten bei 4-er Sudokus (4 pro Seite).                                                                          |
 | FONT_SIZE_6_PAGE    | 12         | Font-Size von Sudoku-Zahlen und Texten bei 6-er Sudokus (6 pro Seite).                                                                          |
@@ -27,12 +28,12 @@ zu komischen Nebeneffekten führen.
 ## How To
 Einfach folgendes Skript im Ordner ausführen:
 ```bash
-python3 main.py
+python main.py
 ```
 
 Optional kann man die Anzahl gewünschter Sudokus auch als extra Argument mitgeben. Zu Testzwecken nützlich, oder wenn es mal schnell gehen soll.
 ```bash
-python3 main.py <Menge>
+python main.py <Menge>
 ```
 
 ### Eigene Fonts hinzufügen
